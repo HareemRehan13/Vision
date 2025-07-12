@@ -19,9 +19,15 @@ class _SignupState extends State<Signup> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+
+  final TextEditingController accountNumberController = TextEditingController();
+  final TextEditingController depositAmountController = TextEditingController();
+
   String? investmentExperience;
   List<String> selectedInvestmentTypes = [];
   String? selectedCity;
+  String? selectedBank;
+
   bool agreeTerms = false;
   bool isLoading = false;
   bool _obscurePassword = true;
@@ -30,11 +36,12 @@ class _SignupState extends State<Signup> {
   final List<String> experienceOptions = ['Beginner', 'Intermediate', 'Expert'];
   final List<String> investmentTypes = ['Stocks', 'Gold', 'Property', 'Crypto', 'Mutual Funds'];
   final List<String> cities = ['Karachi', 'Lahore', 'Islamabad', 'Peshawar', 'Quetta'];
+  final List<String> bankOptions = ['HBL', 'UBL', 'Meezan Bank', 'MCB', 'Alfalah Bank', 'JazzCash', 'EasyPaisa'];
 
   void showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: TextStyle(color: Colors.white)),
+        content: Text(msg, style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.blue[900],
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -70,6 +77,9 @@ class _SignupState extends State<Signup> {
         'experience': investmentExperience,
         'preferredTypes': selectedInvestmentTypes,
         'city': selectedCity,
+        'bankName': selectedBank,
+        'accountNumber': accountNumberController.text.trim(),
+        'initialDeposit': double.parse(depositAmountController.text.trim()),
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -103,36 +113,36 @@ class _SignupState extends State<Signup> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Text("Create Account", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.blue[900])),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               TextFormField(
                 controller: fullNameController,
                 decoration: _input("Full Name", Icons.person),
                 validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
 
               TextFormField(
                 controller: nicController,
                 decoration: _input("NIC Number", Icons.badge),
                 keyboardType: TextInputType.number,
-validator: (value) {
-  if (value == null || value.isEmpty) return 'NIC is required';
-  final nicPattern = RegExp(r'^(\d{5}-\d{7}-\d{1}|\d{13})$');
-  if (!nicPattern.hasMatch(value)) return 'Enter a valid NIC (e.g. 12345-1234567-1)';
-  return null;
-},
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'NIC is required';
+                  final nicPattern = RegExp(r'^(\d{5}-\d{7}-\d{1}|\d{13})$');
+                  if (!nicPattern.hasMatch(value)) return 'Enter a valid NIC (e.g. 12345-1234567-1)';
+                  return null;
+                },
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
 
               TextFormField(
                 controller: emailController,
                 decoration: _input("Email", Icons.email),
                 validator: (v) => v != null && v.contains('@') ? null : "Enter valid email",
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
 
               TextFormField(
                 controller: phoneController,
@@ -140,7 +150,7 @@ validator: (value) {
                 keyboardType: TextInputType.phone,
                 validator: (v) => v != null && v.length >= 10 ? null : "Enter valid phone",
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
 
               DropdownButtonFormField<String>(
                 value: investmentExperience,
@@ -149,7 +159,7 @@ validator: (value) {
                 onChanged: (val) => setState(() => investmentExperience = val),
                 validator: (v) => v == null ? "Select experience level" : null,
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
 
               Wrap(
                 spacing: 6,
@@ -171,7 +181,7 @@ validator: (value) {
                   );
                 }).toList(),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
 
               DropdownButtonFormField<String>(
                 value: selectedCity,
@@ -180,7 +190,45 @@ validator: (value) {
                 onChanged: (val) => setState(() => selectedCity = val),
                 validator: (v) => v == null ? "Select city" : null,
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
+
+              DropdownButtonFormField<String>(
+                value: selectedBank,
+                decoration: _input("Select Bank or Wallet", Icons.account_balance),
+                items: bankOptions.map((bank) => DropdownMenuItem(value: bank, child: Text(bank))).toList(),
+                onChanged: (val) => setState(() => selectedBank = val),
+                validator: (v) => v == null ? "Please select a bank or wallet" : null,
+              ),
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: accountNumberController,
+                decoration: _input("Account Number", Icons.credit_card),
+                keyboardType: TextInputType.number,
+                validator: (v) => v == null || v.length < 10 ? "Enter valid account number" : null,
+              ),
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: depositAmountController,
+                decoration: _input("Initial Deposit Amount", Icons.attach_money),
+                keyboardType: TextInputType.number,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return "Enter amount";
+                  final amount = double.tryParse(v);
+                  if (amount == null) return "Enter a valid amount";
+                  if (amount < 50000) return "Minimum deposit is Rs. 50,000";
+                  return null;
+                },
+              ),
+              const SizedBox(height: 6),
+
+              const Text(
+                "* This is a virtual deposit for simulation only. No real bank transaction will occur.",
+                style: TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+
+              const SizedBox(height: 16),
 
               TextFormField(
                 controller: passwordController,
@@ -193,7 +241,7 @@ validator: (value) {
                 ),
                 validator: (v) => v != null && v.length >= 6 ? null : "Min 6 characters",
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
 
               TextFormField(
                 controller: confirmPasswordController,
@@ -206,18 +254,18 @@ validator: (value) {
                 ),
                 validator: (v) => v != null && v == passwordController.text ? null : "Passwords don’t match",
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
 
               CheckboxListTile(
-                title: Text("I agree to the Terms and Conditions", style: TextStyle(fontSize: 14)),
+                title: const Text("I agree to the Terms and Conditions", style: TextStyle(fontSize: 14)),
                 value: agreeTerms,
                 onChanged: (val) => setState(() => agreeTerms = val ?? false),
                 controlAffinity: ListTileControlAffinity.leading,
               ),
+              const SizedBox(height: 20),
 
-              SizedBox(height: 20),
               isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                       onPressed: signup,
                       style: ElevatedButton.styleFrom(
@@ -225,13 +273,14 @@ validator: (value) {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      child: Text("Sign Up", style: TextStyle(fontSize: 16, color: Colors.white)),
+                      child: const Text("Sign Up", style: TextStyle(fontSize: 16, color: Colors.white)),
                     ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Already have an account? "),
+                  const Text("Already have an account? "),
                   GestureDetector(
                     onTap: () => Navigator.pushNamed(context, "/login"),
                     child: Text("Login", style: TextStyle(color: Colors.blue[900], fontWeight: FontWeight.bold)),
