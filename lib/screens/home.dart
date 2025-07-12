@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../components/appbar.dart';
 import '../components/botton_navbar.dart';
+import '../screens/investment_category.dart'; 
 import '../screens/portfolio.dart';
 import '../screens/ai_suggestions.dart';
 import '../screens/quiz.dart';
@@ -17,6 +18,7 @@ class _HomeState extends State<Home> {
 
   final List<Widget> _screens = const [
     HomeBody(),             // Index 0 - Home
+      InvestmentCategories(),   // Index 1 - Investment 
     // PortfolioScreen(),      // Index 1 - Portfolio
     // AiSuggestionsScreen(),  // Index 2 - AI Advisor
     // QuizScreen(),           // Index 3 - Quiz
