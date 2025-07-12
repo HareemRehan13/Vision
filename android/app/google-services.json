@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1063297145500",
+    "project_id": "investify-1d3ba",
+    "storage_bucket": "investify-1d3ba.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1063297145500:android:9df9ca33ecd4a0986c2b59",
+        "android_client_info": {
+          "package_name": "com.example.investapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCtJ5XGx9FnJb2l7Z5W_YjBeelGDqJGgg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
