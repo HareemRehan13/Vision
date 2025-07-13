@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:investapp/screens/login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const InvestWiseApp());
@@ -17,6 +20,37 @@ class InvestWiseApp extends StatelessWidget {
     );
   }
 }
+Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+  final shouldLogout = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Confirm Logout'),
+      content: const Text('Are you sure you want to logout?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Logout'),
+        ),
+      ],
+    ),
+  );
+
+  if (shouldLogout == true) {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("isLoggedIn", false); // ✅ important line
+    await FirebaseAuth.instance.signOut();
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const Login()),
+      (route) => false,
+    );
+  }
+}
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -28,7 +62,7 @@ class HomeScreen extends StatelessWidget {
       appBar: buildInvestWiseAppBar(context),
       body: const Center(
         child: Text(
-          'Welcome to InvestWise!',
+          'Welcome to Investify!',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
@@ -113,7 +147,7 @@ PreferredSizeWidget buildInvestWiseAppBar(BuildContext context) {
         ),
         const SizedBox(width: 12),
         const Text(
-          'InvestFy',
+          'InvestiFy',
           style: TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -135,10 +169,12 @@ PreferredSizeWidget buildInvestWiseAppBar(BuildContext context) {
           tooltip: 'Pakistan Investments',
           onPressed: () {},
         ),
-        IconButton(
-          icon: const Icon(Icons.logout, color: Colors.white),
-          onPressed: () {},
-        ),
+      IconButton(
+  icon: const Icon(Icons.logout, color: Colors.white),
+  onPressed: () => _showLogoutConfirmationDialog(context),
+),
+
+
       ],
     ),
     bottom: const PreferredSize(
@@ -233,14 +269,43 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
 
             const Divider(),
+ListTile(
+  leading: const Icon(Icons.logout),
+  title: const Text('Logout'),
+  onTap: () async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
 
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
-              onTap: () {
-                // TODO: Implement logout
-              },
-            ),
+    if (shouldLogout == true) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool("isLoggedIn", false); 
+      await FirebaseAuth.instance.signOut();
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const Login()),
+        (route) => false,
+      );
+    }
+  },
+),
+
+
           ],
         ),
       ),
