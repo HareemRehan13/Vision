@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:investapp/screens/login.dart';
+import 'package:investapp/screens/pak_investments.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -164,11 +165,20 @@ PreferredSizeWidget buildInvestWiseAppBar(BuildContext context) {
           icon: const Icon(Icons.notifications_none, color: Colors.white),
           onPressed: () {},
         ),
-        IconButton(
-          icon: const Icon(Icons.flag, color: Colors.white),
-          tooltip: 'Pakistan Investments',
-          onPressed: () {},
-        ),
+       IconButton(
+        
+  icon: const Icon(Icons.flag, color: Colors.white),
+  tooltip: 'Pakistan Investments',
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const Pakistan(),
+      ),
+    );
+  },
+),
+
       IconButton(
   icon: const Icon(Icons.logout, color: Colors.white),
   onPressed: () => _showLogoutConfirmationDialog(context),
