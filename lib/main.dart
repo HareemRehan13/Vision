@@ -1,11 +1,13 @@
-import 'package:investapp/firebase_options.dart';
-import 'package:investapp/screens/home.dart';
-import 'package:investapp/screens/login.dart';
-import 'package:investapp/screens/signup.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'firebase_options.dart';
+import 'screens/splash.dart';
+import 'screens/onboarding.dart';
+import 'screens/login.dart';
+import 'screens/signup.dart';
+import 'screens/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,29 +16,53 @@ void main() async {
   );
 
   final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  // Set default preferences
   if (!prefs.containsKey('notificationsEnabled')) {
     await prefs.setBool('notificationsEnabled', true);
   }
 
+  // Check onboarding & login status
+  bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
   bool isLoggedIn = prefs.getBool("isLoggedIn") ?? false;
-  runApp(MyApp(isLoggedIn: isLoggedIn));
+
+  runApp(MyApp(
+    isFirstTime: isFirstTime,
+    isLoggedIn: isLoggedIn,
+  ));
 }
 
 class MyApp extends StatelessWidget {
+  final bool isFirstTime;
   final bool isLoggedIn;
-  const MyApp({super.key, required this.isLoggedIn});
+
+  const MyApp({
+    super.key,
+    required this.isFirstTime,
+    required this.isLoggedIn,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Investify',
-      theme: ThemeData(primarySwatch: Colors.indigo),
-      home: isLoggedIn ? Home() : Login(),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+        scaffoldBackgroundColor: Colors.white,
+      ),
+
+      // Start with splash screen and pass onboarding/login state
+      home: Splash(
+        isFirstTime: isFirstTime,
+        isLoggedIn: isLoggedIn,
+      ),
+
       routes: {
-        '/login': (context) => Login(),
-        '/signup': (context) => Signup(),
-        '/home': (context) => Home(),
+        '/onboarding': (context) => const OnboardingScreen(),
+        '/login': (context) => const Login(),
+        '/signup': (context) => const Signup(),
+        '/home': (context) => const Home(),
       },
     );
   }

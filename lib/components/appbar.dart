@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:investapp/screens/login.dart';
 import 'package:investapp/screens/pak_investments.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   runApp(const InvestWiseApp());
@@ -81,6 +83,42 @@ class BalanceCard extends StatefulWidget {
 
 class _BalanceCardState extends State<BalanceCard> {
   bool _isVisible = true;
+  double? _initialDeposit;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchInitialDeposit();
+  }
+
+  Future<void> _fetchInitialDeposit() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid != null) {
+      try {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        final deposit = doc.data()?['initialDeposit'];
+        if (deposit != null) {
+          setState(() {
+            _initialDeposit = deposit.toDouble();
+            _isLoading = false;
+          });
+        } else {
+          setState(() {
+            _initialDeposit = 0;
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
+        debugPrint("Error fetching initial deposit: $e");
+        setState(() {
+          _initialDeposit = 0;
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,27 +139,34 @@ class _BalanceCardState extends State<BalanceCard> {
                 fontSize: 16,
               ),
             ),
-            Row(
-              children: [
-                Text(
-                  _isVisible ? 'Rs. 25,000' : '••••••',
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    letterSpacing: 1.2,
+            _isLoading
+                ? const CircularProgressIndicator()
+                : Row(
+                    children: [
+                      Text(
+                        _isVisible
+                            ? 'Rs. ${_initialDeposit?.toStringAsFixed(0) ?? '0'}'
+                            : '••••••',
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () =>
+                            setState(() => _isVisible = !_isVisible),
+                        child: Icon(
+                          _isVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: () => setState(() => _isVisible = !_isVisible),
-                  child: Icon(
-                    _isVisible ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
